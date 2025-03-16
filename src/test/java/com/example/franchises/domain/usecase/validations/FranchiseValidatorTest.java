@@ -3,6 +3,7 @@ package com.example.franchises.domain.usecase.validations;
 
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
+import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.domain.models.Franchise;
 import com.example.franchises.domain.spi.IFranchisePersistencePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +69,23 @@ class FranchiseValidatorTest {
                 .expectError(FranchiseAlreadyExistException.class)
                 .verify();
     }
+    @Test
+    void validateExist_ShouldPass_WhenFranchiseExists() {
+        Long franchiseId = 1L;
+        Mockito.when(franchisePersistencePort.findById(franchiseId)).thenReturn(Mono.just(new Franchise()));
 
+        StepVerifier.create(franchiseValidator.validateExist(franchiseId))
+                .verifyComplete();
+    }
+
+    @Test
+    void validateExist_ShouldFail_WhenFranchiseNotFound() {
+        Long franchiseId = 1L;
+        Mockito.when(franchisePersistencePort.findById(franchiseId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(franchiseValidator.validateExist(franchiseId))
+                .expectError(FranchiseNotFoundException.class)
+                .verify();
+    }
 
 }

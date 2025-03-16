@@ -3,6 +3,7 @@ package com.example.franchises.domain.usecase.validations;
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.ExceptionsEnum;
 import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
+import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.domain.spi.IFranchisePersistencePort;
 import reactor.core.publisher.Mono;
 
@@ -28,5 +29,9 @@ public class FranchiseValidator {
                         : Mono.empty()
                 );
     }
-
+    public Mono<Void> validateExist (Long franchiseId){
+        return franchisePersistencePort.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new FranchiseNotFoundException(ExceptionsEnum.FRANCHISE_NOT_FOUND.getMessage())))
+                .then();
+    }
 }
