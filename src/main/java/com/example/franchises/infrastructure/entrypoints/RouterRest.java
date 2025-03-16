@@ -4,8 +4,11 @@ import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchRespo
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductResponseDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductSaveDto;
 import com.example.franchises.infrastructure.entrypoints.handlers.BranchHandler;
 import com.example.franchises.infrastructure.entrypoints.handlers.FranchiseHandler;
+import com.example.franchises.infrastructure.entrypoints.handlers.ProductHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -59,11 +63,31 @@ public class RouterRest {
                     )
 
 
+            ),
+            @RouterOperation(
+                    path = "/health",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.GET,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "healthCheck",
+                    operation = @Operation(
+                            operationId = "healthCheck",
+                            summary = "Health Check",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful get"
+                                    )
+                            }
+                    )
+
             )
     })
     @Bean
     public RouterFunction<ServerResponse> routerFranchiseFunction(FranchiseHandler franchiseHandler) {
         return route(POST("/franchise"), franchiseHandler::save)
+                .andRoute(GET("/health"), request -> franchiseHandler.healthCheck())
+
                 ;
     }
 
@@ -104,6 +128,48 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerBranchFunction(BranchHandler branchHandler) {
         return route(POST("/branch"), branchHandler::save)
+
+                ;
+    }
+
+
+    @RouterOperations({
+            @RouterOperation(
+                    path = "/product",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.POST,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "save",
+                    operation = @Operation(
+                            operationId = "save",
+                            summary = "Product Creation",
+                            requestBody = @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = ProductSaveDto.class,
+                                                    example = "{ \\\"name\\\": \\\"Product A\\\" }"
+
+                                            )
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "201",
+                                            description = "Successful creation",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ProductResponseDto.class
+                                                    )
+                                            )
+                                    )
+                            }
+                    )
+
+            )
+    })
+    @Bean
+    public RouterFunction<ServerResponse> routerProductFunction(ProductHandler productHandler) {
+        return route(POST("/product"), productHandler::save)
                 ;
     }
 }

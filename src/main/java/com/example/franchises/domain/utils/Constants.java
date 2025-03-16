@@ -9,4 +9,5 @@ public class Constants {
     public static final Integer ZERO_ID = 0;
     public static final Object ZERO_NULL = null;
 
+    public static final Integer ZERO_STOCK = 0;
 }

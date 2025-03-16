@@ -28,4 +28,10 @@ public class BranchPersistenceAdapter implements IBranchPersistencePort {
                 .map(branchEntityMapper::toBranchModel);
     }
 
+    @Override
+    public Mono<Branch> findById(Long id) {
+        return branchRepository.findById(id)
+                .map(branchEntityMapper::toBranchModel);
+    }
+
 }
