@@ -38,4 +38,19 @@ class ProductRouterRestTest {
         verify(productHandler).save(any());
     }
 
+    @Test
+    void testDeleteProduct() {
+        when(productHandler.delete(any())).thenReturn(ServerResponse.ok().bodyValue("Product Deleted"));
+
+        webTestClient.delete()
+                .uri("/product")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Product Deleted");
+
+        verify(productHandler).delete(any());
+    }
+
+
 }

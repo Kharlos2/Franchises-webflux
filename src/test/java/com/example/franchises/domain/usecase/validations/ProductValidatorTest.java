@@ -3,6 +3,7 @@ package com.example.franchises.domain.usecase.validations;
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.BranchNotFoundException;
 import com.example.franchises.domain.exceptions.ProductAlreadyExistException;
+import com.example.franchises.domain.exceptions.ProductNotFoundException;
 import com.example.franchises.domain.models.Branch;
 import com.example.franchises.domain.models.Product;
 import com.example.franchises.domain.spi.IBranchPersistencePort;
@@ -15,6 +16,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class ProductValidatorTest {
@@ -67,6 +70,27 @@ class ProductValidatorTest {
                 .verify();
 
         StepVerifier.create(productValidator.validateBranchId(-1L))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void validateBranchId_ShouldPass_WhenProductIdIsValid() {
+        StepVerifier.create(productValidator.validateProductId(1L))
+                .verifyComplete();
+    }
+
+    @Test
+    void validateBranchId_ShouldFail_WhenProductIdIsNullOrInvalid() {
+        StepVerifier.create(productValidator.validateProductId(null))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        StepVerifier.create(productValidator.validateProductId(0L))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        StepVerifier.create(productValidator.validateProductId(-1L))
                 .expectError(BadRequestException.class)
                 .verify();
     }
@@ -128,4 +152,23 @@ class ProductValidatorTest {
                 .expectError(ProductAlreadyExistException.class)
                 .verify();
     }
+
+    @Test
+    void validateProductExist_successful(){
+        Product product = new Product();
+        Mockito.when(productPersistencePort.findById(anyLong())).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productValidator.validateProductExists(1L))
+                .expectNext(product)
+                .verifyComplete();
+    }
+    @Test
+    void validateProductExist_shouldFail_ProductNotFoundException(){
+        Mockito.when(productPersistencePort.findById(anyLong())).thenReturn(Mono.empty());
+
+        StepVerifier.create(productValidator.validateProductExists(1L))
+                .expectError(ProductNotFoundException.class)
+                .verify();
+    }
+
 }

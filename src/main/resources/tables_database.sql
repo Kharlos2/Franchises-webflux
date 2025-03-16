@@ -14,6 +14,6 @@ CREATE TABLE IF NOT EXISTS products (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     stock INT NOT NULL CHECK (stock >= 0),
-    branch_id BIGINT NOT NULL,
+    branch_id BIGINT,
     CONSTRAINT fk_product_branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 );

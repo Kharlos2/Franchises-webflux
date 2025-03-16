@@ -54,4 +54,17 @@ class ProductUseCaseTest {
         verify(productPersistencePort, times(1)).save(any(Product.class));
     }
 
+    @Test
+    void testDeleteRelationWithBranch() {
+        when(productValidator.validateProductId(anyLong())).thenReturn(Mono.empty());
+        when(productValidator.validateProductExists(anyLong())).thenReturn(Mono.just(product));
+        when(productPersistencePort.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        Mono<Void> result = productUseCase.deleteRelationWithBranch(1L);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(productPersistencePort, times(1)).save(any(Product.class));
+    }
 }

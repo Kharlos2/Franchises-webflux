@@ -6,4 +6,5 @@ public class Constants {
         // constant constructor
     }
     public static final String SERVER_ERROR = "Internal Server Error";
+    public static final String INVALID_LONG_PARAMETER = "Parámetro 'id' inválido";
 }
