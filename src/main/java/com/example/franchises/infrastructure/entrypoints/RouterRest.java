@@ -1,6 +1,7 @@
 package com.example.franchises.infrastructure.entrypoints;
 
 import com.example.franchises.domain.models.StockBranchProduct;
+import com.example.franchises.infrastructure.entrypoints.dtos.UpdateNameDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
@@ -111,6 +112,40 @@ public class RouterRest {
                             }
                     )
 
+            ),
+            @RouterOperation(
+                    path = "/franchise/{id}",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.PATCH,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "updateName",
+                    operation = @Operation(
+                            operationId = "updateName",
+                            summary = "Update franchise name",
+                            requestBody =  @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = UpdateNameDto.class
+
+                                            )
+                                    )
+                            ),
+                            parameters = {
+                                    @Parameter(name = "id", schema = @Schema(type = "integer"),in = ParameterIn.PATH)
+                            },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful update",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = FranchiseResponseDto.class
+                                                    )
+                                            )
+                                    )
+                            }
+                    )
+
             )
     })
     @Bean
@@ -118,6 +153,7 @@ public class RouterRest {
         return route(POST("/franchise"), franchiseHandler::save)
                 .andRoute(GET("/health"), request -> franchiseHandler.healthCheck())
                 .andRoute(GET("/franchise/{id}"),franchiseHandler::findTopProducts)
+                .andRoute(PATCH("/franchise/{id}"), franchiseHandler::updateName)
 
                 ;
     }

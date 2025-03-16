@@ -6,6 +6,7 @@ import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
 import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.infrastructure.entrypoints.dtos.ErrorDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.UpdateNameDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
 import com.example.franchises.infrastructure.entrypoints.mappers.IFranchiseHandlerMapper;
 import org.slf4j.Logger;
@@ -81,4 +82,27 @@ public class FranchiseHandler {
                 });
     }
 
+    public Mono<ServerResponse> updateName(ServerRequest request) {
+        return Mono.just(request.pathVariable("id"))
+                .map(Long::parseLong)
+                        .flatMap(id ->
+                                request.bodyToMono(UpdateNameDto.class)
+                                        .flatMap(dto -> franchiseServicePort.updateName(id,dto.getName()))
+                                        .map(franchiseHandlerMapper::toFranchiseResponseDTO)
+                                        .flatMap(response -> ServerResponse.status(HttpStatus.OK)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .bodyValue(response)))
+
+                .onErrorResume(FranchiseNotFoundException.class, e ->
+                        ServerResponse.status(HttpStatus.NOT_FOUND).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(FranchiseAlreadyExistException.class, e ->
+                        ServerResponse.status(HttpStatus.CONFLICT).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(BadRequestException.class, e ->
+                        ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(e ->{
+                    log.error(e.getMessage(),e);
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValue(new ErrorDto(SERVER_ERROR));
+
+                });
+    }
 }

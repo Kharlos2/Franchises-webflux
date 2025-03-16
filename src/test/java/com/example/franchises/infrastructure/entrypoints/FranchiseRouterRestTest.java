@@ -67,4 +67,17 @@ class FranchiseRouterRestTest {
 
         verify(franchiseHandler).findTopProducts(any());
     }
+    @Test
+    void testUpdateFranchiseName() {
+        when(franchiseHandler.updateName(any())).thenReturn(ServerResponse.ok().bodyValue("Franchise Updated"));
+
+        webTestClient.patch()
+                .uri("/franchise/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Franchise Updated");
+
+        verify(franchiseHandler).updateName(any());
+    }
 }
