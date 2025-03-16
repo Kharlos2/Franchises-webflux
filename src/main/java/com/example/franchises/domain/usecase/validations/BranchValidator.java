@@ -1,9 +1,6 @@
 package com.example.franchises.domain.usecase.validations;
 
-import com.example.franchises.domain.exceptions.BadRequestException;
-import com.example.franchises.domain.exceptions.BranchAlreadyExistException;
-import com.example.franchises.domain.exceptions.ExceptionsEnum;
-import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
+import com.example.franchises.domain.exceptions.*;
 import com.example.franchises.domain.spi.IBranchPersistencePort;
 import com.example.franchises.domain.spi.IFranchisePersistencePort;
 import reactor.core.publisher.Mono;
@@ -47,6 +44,12 @@ public class BranchValidator {
         return Mono.justOrEmpty(newName)
                 .filter(n -> !n.isBlank())
                 .switchIfEmpty(Mono.error(new BadRequestException(ExceptionsEnum.BRANCH_NAME_MANDATORY.getMessage())))
+                .then();
+    }
+
+    public Mono<Void> validateBranchExist(Long branchId){
+        return branchPersistencePort.findById(branchId)
+                .switchIfEmpty(Mono.error(new BranchNotFoundException(ExceptionsEnum.BRANCH_NOT_FOUND.getMessage())))
                 .then();
     }
 

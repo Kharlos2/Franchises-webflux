@@ -2,6 +2,7 @@ package com.example.franchises.domain.usecase.validations;
 
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.BranchAlreadyExistException;
+import com.example.franchises.domain.exceptions.BranchNotFoundException;
 import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.domain.models.Branch;
 import com.example.franchises.domain.models.Franchise;
@@ -121,5 +122,23 @@ class BranchValidatorTest {
                 .verify();
     }
 
+    @Test
+    void validateBranchExist_ShouldPass_WhenBranchExists() {
+        Long branchId = 1L;
+        Mockito.when(branchPersistencePort.findById(branchId)).thenReturn(Mono.just(new Branch()));
+
+        StepVerifier.create(branchValidator.validateBranchExist(branchId))
+                .verifyComplete();
+    }
+
+    @Test
+    void validateBranchExist_ShouldFail_WhenBranchNotFound() {
+        Long branchId = 1L;
+        Mockito.when(branchPersistencePort.findById(branchId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(branchValidator.validateBranchExist(branchId))
+                .expectError(BranchNotFoundException.class)
+                .verify();
+    }
 
 }

@@ -114,7 +114,7 @@ public class RouterRest {
 
             ),
             @RouterOperation(
-                    path = "/franchise/{id}",
+                    path = "/franchise/{id}/name",
                     produces = { MediaType.APPLICATION_JSON_VALUE },
                     method = RequestMethod.PATCH,
                     beanClass = FranchiseHandler.class,
@@ -153,7 +153,7 @@ public class RouterRest {
         return route(POST("/franchise"), franchiseHandler::save)
                 .andRoute(GET("/health"), request -> franchiseHandler.healthCheck())
                 .andRoute(GET("/franchise/{id}"),franchiseHandler::findTopProducts)
-                .andRoute(PATCH("/franchise/{id}"), franchiseHandler::updateName)
+                .andRoute(PATCH("/franchise/{id}/name"), franchiseHandler::updateName)
 
                 ;
     }
@@ -190,11 +190,46 @@ public class RouterRest {
                             }
                     )
 
+            ),
+            @RouterOperation(
+                    path = "/branch/{id}/name",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.PATCH,
+                    beanClass = BranchHandler.class,
+                    beanMethod = "updateName",
+                    operation = @Operation(
+                            operationId = "updateName",
+                            summary = "Update branch name",
+                            requestBody =  @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = UpdateNameDto.class
+
+                                            )
+                                    )
+                            ),
+                            parameters = {
+                                    @Parameter(name = "id", schema = @Schema(type = "integer"),in = ParameterIn.PATH)
+                            },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful update",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = BranchResponseDto.class
+                                                    )
+                                            )
+                                    )
+                            }
+                    )
+
             )
     })
     @Bean
     public RouterFunction<ServerResponse> routerBranchFunction(BranchHandler branchHandler) {
         return route(POST("/branch"), branchHandler::save)
+                .andRoute(PATCH("/branch/{id}/name"), branchHandler::updateName)
 
                 ;
     }

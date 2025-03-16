@@ -99,6 +99,8 @@ public class FranchiseHandler {
                         ServerResponse.status(HttpStatus.CONFLICT).bodyValue(new ErrorDto(e.getMessage())))
                 .onErrorResume(BadRequestException.class, e ->
                         ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(NumberFormatException.class, e ->
+                        ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(new ErrorDto(INVALID_LONG_PARAMETER)))
                 .onErrorResume(e ->{
                     log.error(e.getMessage(),e);
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValue(new ErrorDto(SERVER_ERROR));

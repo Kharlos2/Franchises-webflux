@@ -72,7 +72,7 @@ class FranchiseRouterRestTest {
         when(franchiseHandler.updateName(any())).thenReturn(ServerResponse.ok().bodyValue("Franchise Updated"));
 
         webTestClient.patch()
-                .uri("/franchise/1")
+                .uri("/franchise/1/name")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
