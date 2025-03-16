@@ -64,5 +64,17 @@ class ProductPersistenceAdapterTest {
         verify(productRepository, times(1)).findByNameAndBranchId("Hamburguesa",1L);
     }
 
+    @Test
+    void findById_WhenProductExists_ShouldReturnProduct() {
+        when(productRepository.findById(1L)).thenReturn(Mono.just(productEntity));
+        when(productEntityMapper.toModel(productEntity)).thenReturn(product);
+
+        StepVerifier.create(productPersistenceAdapter.findById(1L))
+                .expectNext(product)
+                .verifyComplete();
+
+        verify(productRepository, times(1)).findById(1L);
+    }
+
 
 }

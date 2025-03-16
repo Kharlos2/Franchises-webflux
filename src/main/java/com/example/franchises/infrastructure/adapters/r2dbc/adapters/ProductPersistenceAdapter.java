@@ -27,4 +27,10 @@ public class ProductPersistenceAdapter implements IProductPersistencePort {
         return productRepository.findByNameAndBranchId(name, branchId)
                 .map(productEntityMapper::toModel);
     }
+
+    @Override
+    public Mono<Product> findById(Long id) {
+        return productRepository.findById(id)
+                .map(productEntityMapper::toModel);
+    }
 }

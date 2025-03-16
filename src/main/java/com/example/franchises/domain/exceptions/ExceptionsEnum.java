@@ -12,6 +12,8 @@ public enum ExceptionsEnum {
     EMPTY_PRODUCT_NAME("The name cannot be empty"),
     NEGATIVE_STOCK("Stock cannot be negative"),
     ALREADY_EXIST_PRODUCT("Already exist product name"),
+    PRODUCT_NOT_FOUND("Product not found"),
+    PRODUCT_ID_MANDATORY("Product id is mandatory"),
 
     ;
 

@@ -4,6 +4,7 @@ import com.example.franchises.domain.api.IProductServicePort;
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.BranchNotFoundException;
 import com.example.franchises.domain.exceptions.ProductAlreadyExistException;
+import com.example.franchises.domain.exceptions.ProductNotFoundException;
 import com.example.franchises.domain.models.Product;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductSaveDto;
@@ -136,4 +137,72 @@ class ProductHandlerTest {
         verify(productHandlerMapper, times(1)).toModel(dto);
         verify(productServicePort, times(1)).save(product);
     }
+    @Test
+    void testDeleteSuccess() {
+        ServerRequest request = MockServerRequest.builder()
+                .queryParam("id", "1")
+                .build();
+        when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productHandler.delete(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).deleteRelationWithBranch(1L);
+    }
+
+    @Test
+    void testDeleteProductNotFound() {
+        ServerRequest request = MockServerRequest.builder()
+                .queryParam("id", "1")
+                .build();
+        when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new ProductNotFoundException("Product not found")));
+
+        StepVerifier.create(productHandler.delete(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).deleteRelationWithBranch(1L);
+    }
+
+    @Test
+    void testDeleteInvalidProductId() {
+        ServerRequest request = MockServerRequest.builder()
+                .queryParam("id", "abc")
+                .build();
+
+        StepVerifier.create(productHandler.delete(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void testDeleteBadRequest() {
+        ServerRequest request = MockServerRequest.builder()
+                .queryParam("id", "1")
+                .build();
+        when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new BadRequestException("Invalid request")));
+
+        StepVerifier.create(productHandler.delete(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).deleteRelationWithBranch(1L);
+    }
+
+    @Test
+    void testDeleteServerError() {
+        ServerRequest request = MockServerRequest.builder()
+                .queryParam("id", "1")
+                .build();
+        when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new RuntimeException("Unexpected error")));
+
+        StepVerifier.create(productHandler.delete(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).deleteRelationWithBranch(1L);
+    }
+
 }

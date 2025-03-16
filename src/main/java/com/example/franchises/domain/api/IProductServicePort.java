@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 public interface IProductServicePort {
 
     Mono<Product> save (Product product);
-
+    Mono<Void> deleteRelationWithBranch(Long id);
 }

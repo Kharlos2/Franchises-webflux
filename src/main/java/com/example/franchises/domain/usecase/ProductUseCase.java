@@ -27,4 +27,15 @@ public class ProductUseCase implements IProductServicePort {
                 productValidator.validateStock(product.getStock())
         ).then(productPersistencePort.save(product));
     }
+
+    @Override
+    public Mono<Void> deleteRelationWithBranch(Long id) {
+        return Mono.when(
+                productValidator.validateProductId(id)
+        ).then(
+                productValidator.validateProductExists(id)
+                .flatMap(product -> productPersistencePort.save(new Product(product.getId(), product.getName(), product.getStock(), null)))
+                .then()
+        );
+    }
 }

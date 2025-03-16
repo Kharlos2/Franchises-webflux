@@ -1,9 +1,7 @@
 package com.example.franchises.domain.usecase.validations;
 
-import com.example.franchises.domain.exceptions.BadRequestException;
-import com.example.franchises.domain.exceptions.BranchNotFoundException;
-import com.example.franchises.domain.exceptions.ExceptionsEnum;
-import com.example.franchises.domain.exceptions.ProductAlreadyExistException;
+import com.example.franchises.domain.exceptions.*;
+import com.example.franchises.domain.models.Product;
 import com.example.franchises.domain.spi.IBranchPersistencePort;
 import com.example.franchises.domain.spi.IProductPersistencePort;
 import reactor.core.publisher.Mono;
@@ -33,6 +31,14 @@ public class ProductValidator {
                 .then();
     }
 
+    public Mono<Void> validateProductId(Long id) {
+        return Mono.justOrEmpty(id)
+                .filter(productId -> productId != ZERO_NULL && productId > ZERO_ID)
+                .switchIfEmpty(Mono.error(new BadRequestException(ExceptionsEnum.PRODUCT_ID_MANDATORY.getMessage())))
+                .then();
+    }
+
+
     public Mono<Void> validateEmptyName(String name) {
         return Mono.justOrEmpty(name)
                 .filter(n -> !n.isBlank())
@@ -56,6 +62,10 @@ public class ProductValidator {
                 );
     }
 
+    public Mono<Product> validateProductExists(Long productId) {
+        return productPersistencePort.findById(productId)
+                .switchIfEmpty(Mono.error(new ProductNotFoundException(ExceptionsEnum.PRODUCT_NOT_FOUND.getMessage())));
 
+    }
 
 }
