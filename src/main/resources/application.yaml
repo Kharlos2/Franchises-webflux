@@ -1,0 +1,14 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "franchises"
+  devtools:
+    add-properties: false
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/franchises?currentSchema=public}
+    username: ${R2DBC_USERNAME:postgres}
+    password: ${R2DBC_PASSWORD:1234}
+  sql:
+    init:
+      mode: "always"
