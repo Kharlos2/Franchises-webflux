@@ -7,6 +7,11 @@ public enum ExceptionsEnum {
     FRANCHISE_NOT_FOUND("Franchise not found"),
     ALREADY_EXIST_BRANCH( "Already exist branch name"),
     BRANCH_NAME_MANDATORY("Branch name is mandatory"),
+    BRANCH_NOT_FOUND( "Branch not found" ),
+    BRANCH_ID_MANDATORY("Branch id is mandatory"),
+    EMPTY_PRODUCT_NAME("The name cannot be empty"),
+    NEGATIVE_STOCK("Stock cannot be negative"),
+    ALREADY_EXIST_PRODUCT("Already exist product name"),
 
     ;
 

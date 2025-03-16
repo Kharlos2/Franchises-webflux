@@ -7,5 +7,6 @@ public interface IBranchPersistencePort {
 
     Mono<Branch> save(Branch branch);
     Mono<Branch> findByNameAndFranchiseId(String name, Long franchiseId);
+    Mono<Branch> findById(Long id);
 
 }
