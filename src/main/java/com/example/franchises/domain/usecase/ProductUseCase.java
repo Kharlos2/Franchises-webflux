@@ -38,4 +38,15 @@ public class ProductUseCase implements IProductServicePort {
                 .then()
         );
     }
+
+    @Override
+    public Mono<Product> updateStock(Long id, Integer stock) {
+        return productValidator.validateStock(stock)
+                .then(productValidator.validateProductExists(id))
+                .flatMap(existingProduct -> {
+                    existingProduct.setStock(stock);
+                    return productPersistencePort.save(existingProduct);
+                });
+    }
+
 }

@@ -7,4 +7,6 @@ public interface IProductServicePort {
 
     Mono<Product> save (Product product);
     Mono<Void> deleteRelationWithBranch(Long id);
+    Mono<Product> updateStock(Long id, Integer stock);
+
 }
