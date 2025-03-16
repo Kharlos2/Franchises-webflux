@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class BranchRouterRestTest {
@@ -41,5 +42,19 @@ class BranchRouterRestTest {
                 .bodyValue(requestDto)
                 .exchange()
                 .expectStatus().isCreated();
+    }
+
+    @Test
+    void testUpdateBranchName() {
+        when(branchHandler.updateName(any())).thenReturn(ServerResponse.ok().bodyValue("Branch Updated"));
+
+        webTestClient.patch()
+                .uri("/branch/1/name")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Branch Updated");
+
+        verify(branchHandler).updateName(any());
     }
 }
