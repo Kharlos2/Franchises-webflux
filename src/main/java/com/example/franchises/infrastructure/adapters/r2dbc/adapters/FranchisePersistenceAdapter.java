@@ -1,10 +1,12 @@
 package com.example.franchises.infrastructure.adapters.r2dbc.adapters;
 
 import com.example.franchises.domain.models.Franchise;
+import com.example.franchises.domain.models.StockBranchProduct;
 import com.example.franchises.domain.spi.IFranchisePersistencePort;
 import com.example.franchises.infrastructure.adapters.r2dbc.entities.FranchiseEntity;
 import com.example.franchises.infrastructure.adapters.r2dbc.mappers.IFranchiseEntityMapper;
 import com.example.franchises.infrastructure.adapters.r2dbc.repositories.IFranchiseRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class FranchisePersistenceAdapter implements IFranchisePersistencePort {
@@ -29,5 +31,10 @@ public class FranchisePersistenceAdapter implements IFranchisePersistencePort {
     @Override
     public Mono<Franchise> findById(Long id) {
         return franchiseRepository.findById(id).map(franchiseEntityMapper::toFranchiseModel);
+    }
+
+    @Override
+    public Flux<StockBranchProduct> findTopStockProductsByFranchiseId(Long id) {
+        return franchiseRepository.findStockByFranchiseId(id).map(franchiseEntityMapper::toStockModel);
     }
 }

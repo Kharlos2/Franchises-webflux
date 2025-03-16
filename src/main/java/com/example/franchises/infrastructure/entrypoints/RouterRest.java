@@ -1,5 +1,6 @@
 package com.example.franchises.infrastructure.entrypoints;
 
+import com.example.franchises.domain.models.StockBranchProduct;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
@@ -83,12 +84,40 @@ public class RouterRest {
                             }
                     )
 
+            ),
+            @RouterOperation(
+                    path = "/franchise/{id}",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.GET,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "findTopProducts",
+                    operation = @Operation(
+                            operationId = "findTopProducts",
+                            summary = "Search for products with the largest stock by franchise number",
+                            parameters = {
+                                    @Parameter(name = "id", schema = @Schema(type = "integer"),in = ParameterIn.PATH)
+                            },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful get",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = StockBranchProduct.class,
+                                                            example = "[{ \\\"productName\\\": \\\"Product A\\\",\\\"branchName\\\": \\\"Branch A\\\",\\\"stock\\\": \\\"1\\\" }]"
+                                                    )
+                                            )
+                                    )
+                            }
+                    )
+
             )
     })
     @Bean
     public RouterFunction<ServerResponse> routerFranchiseFunction(FranchiseHandler franchiseHandler) {
         return route(POST("/franchise"), franchiseHandler::save)
                 .andRoute(GET("/health"), request -> franchiseHandler.healthCheck())
+                .andRoute(GET("/franchise/{id}"),franchiseHandler::findTopProducts)
 
                 ;
     }

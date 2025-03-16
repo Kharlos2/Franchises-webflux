@@ -4,6 +4,7 @@ package com.example.franchises.infrastructure.entrypoints.handlers;
 import com.example.franchises.domain.api.IFranchiseServicePort;
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
+import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.infrastructure.entrypoints.dtos.ErrorDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
 import com.example.franchises.infrastructure.entrypoints.mappers.IFranchiseHandlerMapper;
@@ -16,6 +17,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import static com.example.franchises.infrastructure.entrypoints.utils.Constants.INVALID_LONG_PARAMETER;
 import static com.example.franchises.infrastructure.entrypoints.utils.Constants.SERVER_ERROR;
 
 
@@ -50,7 +52,6 @@ public class FranchiseHandler {
                 });
     }
 
-
     public Mono<ServerResponse> healthCheck (){
 
         return  ServerResponse.ok()
@@ -58,5 +59,26 @@ public class FranchiseHandler {
                 .build();
     }
 
+    public Mono<ServerResponse> findTopProducts(ServerRequest request) {
+
+        return Mono.justOrEmpty(request.pathVariable("id"))
+                .map(Long::parseLong)
+                .flatMapMany(franchiseServicePort::findProductsStock)
+                .collectList()
+                .flatMap(products -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(products))
+                .onErrorResume(FranchiseNotFoundException.class, e ->
+                        ServerResponse.status(HttpStatus.NOT_FOUND).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(NumberFormatException.class, e ->
+                        ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(new ErrorDto(INVALID_LONG_PARAMETER)))
+                .onErrorResume(BadRequestException.class, e ->
+                        ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(new ErrorDto(e.getMessage())))
+                .onErrorResume(e ->{
+                    log.error(e.getMessage(),e);
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValue(new ErrorDto(SERVER_ERROR));
+
+                });
+    }
 
 }

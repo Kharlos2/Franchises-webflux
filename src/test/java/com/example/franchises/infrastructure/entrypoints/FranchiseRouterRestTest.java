@@ -54,4 +54,17 @@ class FranchiseRouterRestTest {
         verify(franchiseHandler).healthCheck();
     }
 
+    @Test
+    void testFindTopProducts() {
+        when(franchiseHandler.findTopProducts(any())).thenReturn(ServerResponse.ok().bodyValue("Top Products List"));
+
+        webTestClient.get()
+                .uri("/franchise/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Top Products List");
+
+        verify(franchiseHandler).findTopProducts(any());
+    }
 }

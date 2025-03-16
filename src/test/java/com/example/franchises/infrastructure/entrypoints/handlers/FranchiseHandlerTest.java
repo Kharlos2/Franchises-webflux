@@ -3,7 +3,9 @@ package com.example.franchises.infrastructure.entrypoints.handlers;
 import com.example.franchises.domain.api.IFranchiseServicePort;
 import com.example.franchises.domain.exceptions.BadRequestException;
 import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
+import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.domain.models.Franchise;
+import com.example.franchises.domain.models.StockBranchProduct;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
 import com.example.franchises.infrastructure.entrypoints.mappers.IFranchiseHandlerMapper;
@@ -16,10 +18,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.reactive.function.server.MockServerRequest;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -124,6 +128,79 @@ class FranchiseHandlerTest {
     void healthCheck (){
         StepVerifier.create(franchiseHandler.healthCheck())
                 .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindTopProducts_Success() {
+        Long franchiseId = 1L;
+        List<StockBranchProduct> products = List.of(new StockBranchProduct("Branch A", "Product A", 10));
+        ServerRequest request = MockServerRequest.builder()
+                .pathVariable("id", String.valueOf(franchiseId))
+                .build();
+
+        when(franchiseServicePort.findProductsStock(franchiseId)).thenReturn(Flux.fromIterable(products));
+
+        StepVerifier.create(franchiseHandler.findTopProducts(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).findProductsStock(franchiseId);
+    }
+
+    @Test
+    void testFindTopProducts_NotFound() {
+        Long franchiseId = 1L;
+        ServerRequest request = MockServerRequest.builder()
+                .pathVariable("id", String.valueOf(franchiseId))
+                .build();
+
+        when(franchiseServicePort.findProductsStock(franchiseId))
+                .thenReturn(Flux.error(new FranchiseNotFoundException("Franchise not found")));
+
+        StepVerifier.create(franchiseHandler.findTopProducts(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindTopProducts_InvalidFranchiseId() {
+        ServerRequest request = MockServerRequest.builder()
+                .pathVariable("id", "invalid")
+                .build();
+
+        StepVerifier.create(franchiseHandler.findTopProducts(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindTopProducts_BadRequest() {
+        Long franchiseId = 1L;
+        ServerRequest request = MockServerRequest.builder()
+                .pathVariable("id", String.valueOf(franchiseId))
+                .build();
+
+        when(franchiseServicePort.findProductsStock(franchiseId))
+                .thenReturn(Flux.error(new BadRequestException("Invalid request")));
+
+        StepVerifier.create(franchiseHandler.findTopProducts(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindTopProducts_InternalServerError() {
+        Long franchiseId = 1L;
+        ServerRequest request = MockServerRequest.builder()
+                .pathVariable("id", String.valueOf(franchiseId))
+                .build();
+
+        when(franchiseServicePort.findProductsStock(franchiseId))
+                .thenReturn(Flux.error(new RuntimeException("Unexpected error")));
+
+        StepVerifier.create(franchiseHandler.findTopProducts(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
                 .verifyComplete();
     }
 
