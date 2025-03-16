@@ -9,5 +9,6 @@ public interface IFranchiseServicePort {
 
     Mono<Franchise> save(Franchise franchise);
     Flux<StockBranchProduct> findProductsStock(Long id);
+    Mono<Franchise> updateName(Long id, String newName);
 
 }

@@ -37,4 +37,19 @@ public class FranchiseUseCase implements IFranchiseServicePort {
                 .thenMany(franchisePersistencePort.findTopStockProductsByFranchiseId(franchiseId));
     }
 
+    @Override
+    public Mono<Franchise> updateName(Long id, String newName) {
+        return Mono.when(
+                franchiseValidator.validateExist(id),
+                franchiseValidator.validateName(newName),
+                franchiseValidator.validateNameExist(newName)
+        ).then(
+                franchisePersistencePort.findById(id)
+                        .flatMap(existingFranchise -> {
+                            existingFranchise.setName(newName);
+                            return franchisePersistencePort.save(existingFranchise);
+                        })
+        );
+    }
+
 }

@@ -6,9 +6,11 @@ import com.example.franchises.domain.exceptions.FranchiseAlreadyExistException;
 import com.example.franchises.domain.exceptions.FranchiseNotFoundException;
 import com.example.franchises.domain.models.Franchise;
 import com.example.franchises.domain.models.StockBranchProduct;
+import com.example.franchises.infrastructure.entrypoints.dtos.UpdateNameDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
 import com.example.franchises.infrastructure.entrypoints.mappers.IFranchiseHandlerMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +44,12 @@ class FranchiseHandlerTest {
     @InjectMocks
     private FranchiseHandler franchiseHandler;
 
+    private UpdateNameDto updateNameDto;
+    @BeforeEach
+    void setUp(){
+        updateNameDto = new UpdateNameDto("Test Franchise");
+
+    }
 
 
     @Test
@@ -204,5 +212,97 @@ class FranchiseHandlerTest {
                 .verifyComplete();
     }
 
+
+    @Test
+    void testUpdateSuccess() {
+        FranchiseResponseDto responseDTO = new FranchiseResponseDto(1L, "Test Franchise");
+        Franchise franchise = new Franchise(1L,"Test Franchise");
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/Franchise"))
+                .pathVariable("id","1")
+                .body(Mono.just(updateNameDto));
+        when(franchiseServicePort.updateName(anyLong(),anyString())).thenReturn(Mono.just(franchise));
+        when(franchiseHandlerMapper.toFranchiseResponseDTO(any())).thenReturn(responseDTO);
+
+
+        StepVerifier.create(franchiseHandler.updateName(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).updateName(anyLong(),anyString());
+
+
+    }
+
+    @Test
+    void testUpdateConflict() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/Franchise"))
+                .pathVariable("id","1")
+                .body(Mono.just(updateNameDto));
+        when(franchiseServicePort.updateName(anyLong(),anyString())).thenReturn(Mono.error(new FranchiseAlreadyExistException("Franchise already exist")));
+
+
+        StepVerifier.create(franchiseHandler.updateName(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.CONFLICT))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).updateName(anyLong(),anyString());
+
+    }
+
+    @Test
+    void testUpdateBadRequest() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/Franchise"))
+                .pathVariable("id","1")
+                .body(Mono.just(updateNameDto));
+        when(franchiseServicePort.updateName(anyLong(),anyString())).thenReturn(Mono.error(new BadRequestException("nO no no ")));
+
+
+        StepVerifier.create(franchiseHandler.updateName(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).updateName(anyLong(),anyString());
+    }
+
+    @Test
+    void testUpdateError() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/Franchise"))
+                .pathVariable("id","1")
+                .body(Mono.just(updateNameDto));
+        when(franchiseServicePort.updateName(anyLong(),anyString())).thenReturn(Mono.error(new RuntimeException("Error")));
+
+
+        StepVerifier.create(franchiseHandler.updateName(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).updateName(anyLong(),anyString());
+    }
+
+
+    @Test
+    void testUpdateNotFound() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/Franchise"))
+                .pathVariable("id","1")
+                .body(Mono.just(updateNameDto));
+        when(franchiseServicePort.updateName(anyLong(),anyString())).thenReturn(Mono.error(new FranchiseNotFoundException("Error")));
+
+
+        StepVerifier.create(franchiseHandler.updateName(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+                .verifyComplete();
+
+        verify(franchiseServicePort, times(1)).updateName(anyLong(),anyString());
+    }
 
 }
