@@ -6,11 +6,13 @@ import com.example.franchises.infrastructure.entrypoints.dtos.franchise.Franchis
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductSaveDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductUpdateStockDto;
 import com.example.franchises.infrastructure.entrypoints.handlers.BranchHandler;
 import com.example.franchises.infrastructure.entrypoints.handlers.FranchiseHandler;
 import com.example.franchises.infrastructure.entrypoints.handlers.ProductHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -167,7 +169,7 @@ public class RouterRest {
 
             ),
             @RouterOperation(
-                    path = "/product",
+                    path = "/product/{id}",
                     produces = { MediaType.APPLICATION_JSON_VALUE },
                     method = RequestMethod.DELETE,
                     beanClass = ProductHandler.class,
@@ -176,8 +178,37 @@ public class RouterRest {
                             operationId = "delete",
                             summary = "Product delete",
                             parameters = {
-                                    @Parameter(name = "id", schema = @Schema(type = "Long", defaultValue = "0"))
+                                    @Parameter(name = "id", required = true, schema = @Schema(type = "integer"), in = ParameterIn.PATH)
                             },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful delete"
+                                    )
+                            }
+                    )
+
+            ),
+            @RouterOperation(
+                    path = "/product/update-stock/{id}",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.PATCH,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "updateStock",
+                    operation = @Operation(
+                            operationId = "updateStock",
+                            summary = "Product delete",
+                            parameters = {
+                                    @Parameter(name = "id", required = true, schema = @Schema(type = "integer"), in = ParameterIn.PATH)
+                            },
+                            requestBody = @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = ProductUpdateStockDto.class
+
+                                            )
+                                    )
+                            ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
@@ -191,8 +222,8 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerProductFunction(ProductHandler productHandler) {
         return route(POST("/product"), productHandler::save)
-                .andRoute(DELETE("/product"), productHandler::delete)
-
+                .andRoute(DELETE("/product/{id}"), productHandler::delete)
+                .andRoute(PATCH("/product/update-stock/{id}"), productHandler::updateStock)
                 ;
     }
 }

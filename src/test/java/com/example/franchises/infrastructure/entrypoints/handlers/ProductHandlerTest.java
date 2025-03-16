@@ -8,6 +8,7 @@ import com.example.franchises.domain.exceptions.ProductNotFoundException;
 import com.example.franchises.domain.models.Product;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductSaveDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductUpdateStockDto;
 import com.example.franchises.infrastructure.entrypoints.mappers.IProductHandlerMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,12 +43,14 @@ class ProductHandlerTest {
     private ProductSaveDto dto;
     private ProductResponseDto responseDTO;
     private Product product;
+    private ProductUpdateStockDto updateStockDto;
 
     @BeforeEach
     void setUp() {
         dto = new ProductSaveDto("Test product",1,1L);
         responseDTO = new ProductResponseDto(1L, "Test product",1);
         product = new Product(1L,"Test Franchise",2,1L);
+        updateStockDto = new ProductUpdateStockDto(10);
     }
 
     @Test
@@ -140,7 +143,7 @@ class ProductHandlerTest {
     @Test
     void testDeleteSuccess() {
         ServerRequest request = MockServerRequest.builder()
-                .queryParam("id", "1")
+                .pathVariable("id", "1")
                 .build();
         when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.empty());
 
@@ -154,7 +157,7 @@ class ProductHandlerTest {
     @Test
     void testDeleteProductNotFound() {
         ServerRequest request = MockServerRequest.builder()
-                .queryParam("id", "1")
+                .pathVariable("id", "1")
                 .build();
         when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new ProductNotFoundException("Product not found")));
 
@@ -168,7 +171,7 @@ class ProductHandlerTest {
     @Test
     void testDeleteInvalidProductId() {
         ServerRequest request = MockServerRequest.builder()
-                .queryParam("id", "abc")
+                .pathVariable("id", "abc")
                 .build();
 
         StepVerifier.create(productHandler.delete(request))
@@ -180,7 +183,7 @@ class ProductHandlerTest {
     @Test
     void testDeleteBadRequest() {
         ServerRequest request = MockServerRequest.builder()
-                .queryParam("id", "1")
+                .pathVariable("id", "1")
                 .build();
         when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new BadRequestException("Invalid request")));
 
@@ -194,7 +197,7 @@ class ProductHandlerTest {
     @Test
     void testDeleteServerError() {
         ServerRequest request = MockServerRequest.builder()
-                .queryParam("id", "1")
+                .pathVariable("id", "1")
                 .build();
         when(productServicePort.deleteRelationWithBranch(1L)).thenReturn(Mono.error(new RuntimeException("Unexpected error")));
 
@@ -203,6 +206,84 @@ class ProductHandlerTest {
                 .verifyComplete();
 
         verify(productServicePort, times(1)).deleteRelationWithBranch(1L);
+    }
+
+    @Test
+    void testUpdateStockSuccess() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .pathVariable("id", "1")
+                .body(Mono.just(updateStockDto));
+
+        when(productServicePort.updateStock(anyLong(), anyInt())).thenReturn(Mono.just(product));
+        when(productHandlerMapper.toProductResponseDTO(any())).thenReturn(responseDTO);
+
+        StepVerifier.create(productHandler.updateStock(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).updateStock(1L, 10);
+    }
+
+    @Test
+    void testUpdateStockNotFound() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .pathVariable("id", "1")
+                .body(Mono.just(updateStockDto));
+
+        when(productServicePort.updateStock(anyLong(), anyInt()))
+                .thenReturn(Mono.error(new ProductNotFoundException("Product not found")));
+
+        StepVerifier.create(productHandler.updateStock(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).updateStock(1L, 10);
+    }
+
+    @Test
+    void testUpdateStockFormatException() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .pathVariable("id", "abc")
+                .body(Mono.just(updateStockDto));
+
+        StepVerifier.create(productHandler.updateStock(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+    @Test
+    void testUpdateStockBadRequest() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .pathVariable("id", "1")
+                .body(Mono.just(updateStockDto));
+
+        when(productServicePort.updateStock(anyLong(), anyInt()))
+                .thenReturn(Mono.error(new BadRequestException("Negative id")));
+
+        StepVerifier.create(productHandler.updateStock(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).updateStock(1L, 10);
+    }
+    @Test
+    void testUpdateStockServerError() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .pathVariable("id", "1")
+                .body(Mono.just(updateStockDto));
+
+        when(productServicePort.updateStock(anyLong(), anyInt()))
+                .thenReturn(Mono.error(new RuntimeException("Internal Server Error")));
+
+        StepVerifier.create(productHandler.updateStock(request))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+
+        verify(productServicePort, times(1)).updateStock(1L, 10);
     }
 
 }

@@ -14,7 +14,7 @@ public enum ExceptionsEnum {
     ALREADY_EXIST_PRODUCT("Already exist product name"),
     PRODUCT_NOT_FOUND("Product not found"),
     PRODUCT_ID_MANDATORY("Product id is mandatory"),
-
+    INCORRECT_ID("The id must be a long")
     ;
 
     private final String message;

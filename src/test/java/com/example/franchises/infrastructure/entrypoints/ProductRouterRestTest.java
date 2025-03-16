@@ -43,13 +43,27 @@ class ProductRouterRestTest {
         when(productHandler.delete(any())).thenReturn(ServerResponse.ok().bodyValue("Product Deleted"));
 
         webTestClient.delete()
-                .uri("/product")
+                .uri("/product/1")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
                 .isEqualTo("Product Deleted");
 
         verify(productHandler).delete(any());
+    }
+
+    @Test
+    void testUpdateProductStock() {
+        when(productHandler.updateStock(any())).thenReturn(ServerResponse.ok().bodyValue("Stock Updated"));
+
+        webTestClient.patch()
+                .uri("/product/update-stock/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Stock Updated");
+
+        verify(productHandler).updateStock(any());
     }
 
 

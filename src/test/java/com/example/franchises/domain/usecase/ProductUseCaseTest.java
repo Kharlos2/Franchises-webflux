@@ -67,4 +67,20 @@ class ProductUseCaseTest {
 
         verify(productPersistencePort, times(1)).save(any(Product.class));
     }
+
+    @Test
+    void testUpdateStock() {
+
+        when(productValidator.validateProductExists(anyLong())).thenReturn(Mono.just(product));
+        when(productValidator.validateStock(anyInt())).thenReturn(Mono.empty());
+        when(productPersistencePort.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        Mono<Product> result = productUseCase.updateStock(1L, 2);
+
+        StepVerifier.create(result)
+                .expectNext(product)
+                .verifyComplete();
+
+        verify(productPersistencePort, times(1)).save(any(Product.class));
+    }
 }
