@@ -1,7 +1,10 @@
 package com.example.franchises.infrastructure.entrypoints;
 
+import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchResponseDto;
+import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.franchise.FranchiseSaveDto;
+import com.example.franchises.infrastructure.entrypoints.handlers.BranchHandler;
 import com.example.franchises.infrastructure.entrypoints.handlers.FranchiseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,4 +67,43 @@ public class RouterRest {
                 ;
     }
 
+    @RouterOperations({
+            @RouterOperation(
+                    path = "/branch",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.POST,
+                    beanClass = BranchHandler.class,
+                    beanMethod = "save",
+                    operation = @Operation(
+                            operationId = "save",
+                            summary = "Branch Creation",
+                            requestBody = @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = BranchSaveDto.class,
+                                                    example = "{ \\\"name\\\": \\\"Branch A\\\", \\\"franchiseId\\\": \\\"1\\\"}"
+
+                                            )
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "201",
+                                            description = "Successful creation",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = BranchResponseDto.class
+                                                    )
+                                            )
+                                    )
+                            }
+                    )
+
+            )
+    })
+    @Bean
+    public RouterFunction<ServerResponse> routerBranchFunction(BranchHandler branchHandler) {
+        return route(POST("/branch"), branchHandler::save)
+                ;
+    }
 }

@@ -25,4 +25,9 @@ public class FranchisePersistenceAdapter implements IFranchisePersistencePort {
     public Mono<Franchise> findByName(String franchiseName) {
         return franchiseRepository.findByName(franchiseName).map(franchiseEntityMapper::toFranchiseModel);
     }
+
+    @Override
+    public Mono<Franchise> findById(Long id) {
+        return franchiseRepository.findById(id).map(franchiseEntityMapper::toFranchiseModel);
+    }
 }
