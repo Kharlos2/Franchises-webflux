@@ -72,9 +72,11 @@ class FranchiseValidatorTest {
     @Test
     void validateExist_ShouldPass_WhenFranchiseExists() {
         Long franchiseId = 1L;
-        Mockito.when(franchisePersistencePort.findById(franchiseId)).thenReturn(Mono.just(new Franchise()));
+        Franchise franchise = new Franchise();
+        Mockito.when(franchisePersistencePort.findById(franchiseId)).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(franchiseValidator.validateExist(franchiseId))
+                .expectNext(franchise)
                 .verifyComplete();
     }
 

@@ -49,4 +49,18 @@ public class ProductUseCase implements IProductServicePort {
                 });
     }
 
+    @Override
+    public Mono<Product> updateName(Long id, String newName) {
+        return productValidator.validateEmptyName(newName)
+                .then(productValidator.validateProductExists(id))
+                .flatMap(existingProduct ->
+                        productValidator.validateProductNameInBranch(newName, existingProduct.getBranchId())
+                                .then(Mono.defer(() -> {
+                                    existingProduct.setName(newName);
+                                    return productPersistencePort.save(existingProduct);
+                                }))
+                );
+    }
+
+
 }

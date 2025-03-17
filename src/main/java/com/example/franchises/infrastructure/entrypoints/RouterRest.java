@@ -1,6 +1,7 @@
 package com.example.franchises.infrastructure.entrypoints;
 
 import com.example.franchises.domain.models.StockBranchProduct;
+import com.example.franchises.infrastructure.entrypoints.dtos.ErrorDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.UpdateNameDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.branch.BranchSaveDto;
@@ -62,7 +63,25 @@ public class RouterRest {
                                                             implementation = FranchiseResponseDto.class
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -108,7 +127,25 @@ public class RouterRest {
                                                             example = "[{ \\\"productName\\\": \\\"Product A\\\",\\\"branchName\\\": \\\"Branch A\\\",\\\"stock\\\": \\\"1\\\" }]"
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -142,7 +179,25 @@ public class RouterRest {
                                                             implementation = FranchiseResponseDto.class
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -186,7 +241,25 @@ public class RouterRest {
                                                             implementation = BranchResponseDto.class
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -220,7 +293,25 @@ public class RouterRest {
                                                             implementation = BranchResponseDto.class
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -263,7 +354,25 @@ public class RouterRest {
                                                             implementation = ProductResponseDto.class
                                                     )
                                             )
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -284,7 +393,25 @@ public class RouterRest {
                                     @ApiResponse(
                                             responseCode = "200",
                                             description = "Successful delete"
-                                    )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
@@ -312,18 +439,94 @@ public class RouterRest {
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
-                                            description = "Successful delete"
-                                    )
+                                            description = "Successful delete",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ProductResponseDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
                             }
                     )
 
             ),
+            @RouterOperation(
+                    path = "/product/{id}/name",
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    method = RequestMethod.PATCH,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "updateName",
+                    operation = @Operation(
+                            operationId = "updateName",
+                            summary = "Update branch name",
+                            requestBody =  @RequestBody(
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = UpdateNameDto.class
+
+                                            )
+                                    )
+                            ),
+                            parameters = {
+                                    @Parameter(name = "id", schema = @Schema(type = "integer"),in = ParameterIn.PATH)
+                            },
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Successful update",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ProductResponseDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "4xx",
+                                            description = "Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal Error",
+                                            content = @Content(
+                                                    schema = @Schema(
+                                                            implementation = ErrorDto.class
+                                                    )
+                                            )
+                                    ),
+                            }
+                    )
+
+            )
     })
     @Bean
     public RouterFunction<ServerResponse> routerProductFunction(ProductHandler productHandler) {
         return route(POST("/product"), productHandler::save)
                 .andRoute(DELETE("/product/{id}"), productHandler::delete)
                 .andRoute(PATCH("/product/update-stock/{id}"), productHandler::updateStock)
+                .andRoute(PATCH("/product/{id}/name"), productHandler::updateName)
                 ;
     }
 }

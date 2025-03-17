@@ -125,9 +125,11 @@ class BranchValidatorTest {
     @Test
     void validateBranchExist_ShouldPass_WhenBranchExists() {
         Long branchId = 1L;
-        Mockito.when(branchPersistencePort.findById(branchId)).thenReturn(Mono.just(new Branch()));
+        Branch branch = new Branch();
+        Mockito.when(branchPersistencePort.findById(branchId)).thenReturn(Mono.just(branch));
 
         StepVerifier.create(branchValidator.validateBranchExist(branchId))
+                .expectNext(branch)
                 .verifyComplete();
     }
 

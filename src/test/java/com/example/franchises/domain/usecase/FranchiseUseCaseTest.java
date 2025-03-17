@@ -57,10 +57,9 @@ class FranchiseUseCaseTest {
         Franchise existingFranchise = new Franchise(1L, "Old Name");
         Franchise updatedFranchise = new Franchise(1L, "New Name");
 
-        when(franchiseValidator.validateExist(updatedFranchise.getId())).thenReturn(Mono.empty());
+        when(franchiseValidator.validateExist(updatedFranchise.getId())).thenReturn(Mono.just(existingFranchise));
         when(franchiseValidator.validateName(updatedFranchise.getName())).thenReturn(Mono.empty());
         when(franchiseValidator.validateNameExist(updatedFranchise.getName())).thenReturn(Mono.empty());
-        when(franchisePersistencePort.findById(updatedFranchise.getId())).thenReturn(Mono.just(existingFranchise));
         when(franchisePersistencePort.save(existingFranchise)).thenReturn(Mono.just(updatedFranchise));
 
         StepVerifier.create(franchiseUseCase.updateName(updatedFranchise.getId(), "New Name"))

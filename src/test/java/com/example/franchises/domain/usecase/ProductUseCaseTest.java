@@ -83,4 +83,20 @@ class ProductUseCaseTest {
 
         verify(productPersistencePort, times(1)).save(any(Product.class));
     }
+
+    @Test
+    void testUpdateName() {
+        when(productValidator.validateEmptyName(anyString())).thenReturn(Mono.empty());
+        when(productValidator.validateProductExists(anyLong())).thenReturn(Mono.just(product));
+        when(productValidator.validateProductNameInBranch(anyString(),anyLong())).thenReturn(Mono.empty());
+        when(productPersistencePort.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        Mono<Product> result = productUseCase.updateName(1L, "New name");
+
+        StepVerifier.create(result)
+                .expectNext(product)
+                .verifyComplete();
+
+        verify(productPersistencePort, times(1)).save(any(Product.class));
+    }
 }

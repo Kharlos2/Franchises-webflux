@@ -6,6 +6,7 @@ import com.example.franchises.domain.exceptions.BranchNotFoundException;
 import com.example.franchises.domain.exceptions.ProductAlreadyExistException;
 import com.example.franchises.domain.exceptions.ProductNotFoundException;
 import com.example.franchises.domain.models.Product;
+import com.example.franchises.infrastructure.entrypoints.dtos.UpdateNameDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductResponseDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductSaveDto;
 import com.example.franchises.infrastructure.entrypoints.dtos.product.ProductUpdateStockDto;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.reactive.function.server.MockServerRequest;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -44,6 +46,7 @@ class ProductHandlerTest {
     private ProductResponseDto responseDTO;
     private Product product;
     private ProductUpdateStockDto updateStockDto;
+    private UpdateNameDto updateNameDto;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +54,7 @@ class ProductHandlerTest {
         responseDTO = new ProductResponseDto(1L, "Test product",1);
         product = new Product(1L,"Test Franchise",2,1L);
         updateStockDto = new ProductUpdateStockDto(10);
+        updateNameDto = new UpdateNameDto("NuevoNombre");
     }
 
     @Test
@@ -280,10 +284,115 @@ class ProductHandlerTest {
                 .thenReturn(Mono.error(new RuntimeException("Internal Server Error")));
 
         StepVerifier.create(productHandler.updateStock(request))
-                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
                 .verifyComplete();
 
         verify(productServicePort, times(1)).updateStock(1L, 10);
+    }
+
+    @Test
+    void testUpdateProductName_Success() {
+        when(productServicePort.updateName(anyLong(), anyString())).thenReturn(Mono.just(product));
+        when(productHandlerMapper.toProductResponseDTO(any(Product.class))).thenReturn(responseDTO);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "1")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.OK))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateProductName_NotFound() {
+        when(productServicePort.updateName(anyLong(), anyString()))
+                .thenReturn(Mono.error(new ProductNotFoundException("Producto no encontrado")));
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "1")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateProductName_Conflict() {
+        when(productServicePort.updateName(anyLong(), anyString()))
+                .thenReturn(Mono.error(new ProductAlreadyExistException("Producto ya existe")));
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "1")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.CONFLICT))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateProductName_BadRequest() {
+        when(productServicePort.updateName(anyLong(), anyString()))
+                .thenReturn(Mono.error(new BadRequestException("Bad request")));
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "1")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateProductName_InternalError() {
+        when(productServicePort.updateName(anyLong(), anyString()))
+                .thenReturn(Mono.error(new RuntimeException("Error inesperado")));
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "1")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateProductName_InvalidParameter() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/product"))
+                .pathVariable("id", "A")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = productHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
     }
 
 }

@@ -65,6 +65,18 @@ class ProductRouterRestTest {
 
         verify(productHandler).updateStock(any());
     }
+    @Test
+    void testUpdateProductName() {
+        when(productHandler.updateName(any())).thenReturn(ServerResponse.ok().bodyValue("Product Name Updated"));
 
+        webTestClient.patch()
+                .uri("/product/1/name")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo("Product Name Updated");
+
+        verify(productHandler).updateName(any());
+    }
 
 }

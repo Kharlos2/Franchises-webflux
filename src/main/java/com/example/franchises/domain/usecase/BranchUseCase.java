@@ -30,17 +30,15 @@ public class BranchUseCase implements IBranchServicePort {
 
     @Override
     public Mono<Branch> updateName(Long id, String newName) {
-        return Mono.when(
-                branchValidator.validateBranchName(newName),
-                branchValidator.validateBranchExist(id),
-                branchValidator.validateUniqueBranchNameInFranchise(newName,id)
-        ).then(
-                branchPersistencePort.findById(id)
-                        .flatMap(existingBranch -> {
-                            existingBranch.setName(newName);
-                            return branchPersistencePort.save(existingBranch);
-                        })
-        );
+        return branchValidator.validateBranchName(newName)
+                .then(branchValidator.validateBranchExist(id))
+                .flatMap(existingBranch ->
+                        branchValidator.validateUniqueBranchNameInFranchise(newName, existingBranch.getFranchiseId())
+                                .then(Mono.defer(() -> {
+                                    existingBranch.setName(newName);
+                                    return branchPersistencePort.save(existingBranch);
+                                }))
+                );
     }
 
 }
