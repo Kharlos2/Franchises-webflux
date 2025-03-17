@@ -25,3 +25,7 @@ Tener libre el puerto 8080 o cambiarlo desde el yaml y para la base de datos el 
 
 Cuando el proyecto este corriendo se puede ingresar a la documentación con openapi en
 http://localhost:8080/webjars/swagger-ui/index.html#/
+
+
+# Diagrama AWS
+![img.png](img.png)
