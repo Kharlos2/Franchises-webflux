@@ -30,22 +30,19 @@ public class FranchiseUseCase implements IFranchiseServicePort {
     }
 
     @Override
-    public Flux<StockBranchProduct> findProductsStock(Long franchiseId) {
-        return Mono.when(
-                        franchiseValidator.validateExist(franchiseId)
-                )
-                .thenMany(franchisePersistencePort.findTopStockProductsByFranchiseId(franchiseId));
+    public Flux<StockBranchProduct> findProductsStock(Long id) {
+        return franchiseValidator.validateExist(id)
+                .thenMany(franchisePersistencePort.findTopStockProductsByFranchiseId(id));
     }
 
     @Override
     public Mono<Franchise> updateName(Long id, String newName) {
         return Mono.when(
-                franchiseValidator.validateExist(id),
                 franchiseValidator.validateName(newName),
                 franchiseValidator.validateNameExist(newName)
         ).then(
-                franchisePersistencePort.findById(id)
-                        .flatMap(existingFranchise -> {
+                franchiseValidator.validateExist(id)
+                .flatMap(existingFranchise -> {
                             existingFranchise.setName(newName);
                             return franchisePersistencePort.save(existingFranchise);
                         })

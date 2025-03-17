@@ -251,4 +251,21 @@ class BranchHandlerTest {
                 .verifyComplete();
     }
 
+    @Test
+    void testUpdateBranchName_InvalidParameter() {
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/branch"))
+                .pathVariable("id","A")
+                .body(Mono.just(updateNameDto));
+
+        Mono<ServerResponse> responseMono = branchHandler.updateName(request);
+
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response ->
+                        response.statusCode().equals(HttpStatus.BAD_REQUEST))
+                .verifyComplete();
+    }
+
 }

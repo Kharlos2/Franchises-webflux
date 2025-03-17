@@ -55,9 +55,8 @@ class BranchUseCaseTest {
     }
     @Test
     void testUpdateBranchName() {
-        when(branchPersistencePort.findById(anyLong())).thenReturn(Mono.just(branch));
-        when(branchValidator.validateBranchExist(anyLong())).thenReturn(Mono.empty());
         when(branchValidator.validateBranchName(anyString())).thenReturn(Mono.empty());
+        when(branchValidator.validateBranchExist(anyLong())).thenReturn(Mono.just(branch));
         when(branchValidator.validateUniqueBranchNameInFranchise(anyString(),anyLong())).thenReturn(Mono.empty());
         when(branchPersistencePort.save(any(Branch.class))).thenReturn(Mono.empty());
 
@@ -66,7 +65,6 @@ class BranchUseCaseTest {
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(branchPersistencePort, times(1)).findById(anyLong());
         verify(branchPersistencePort, times(1)).save(any(Branch.class));
     }
 }
