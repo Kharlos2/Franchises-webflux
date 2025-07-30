@@ -8,6 +8,9 @@ public class FranchisesApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FranchisesApplication.class, args);
+
+
+		System.out.println("Franchises Application is running!");
 	}
 
 }
